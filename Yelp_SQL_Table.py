@@ -15,6 +15,7 @@ create_cafe = '''
         "Rating"            REAL,
         "NumberOfReviews"   INTEGER,
         "State"             TEXT,
+        "City"             TEXT,
         "FullAddress"       TEXT,
         "ZipCode"           INTEGER,
         "PhoneNumber"       TEXT,
