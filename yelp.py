@@ -39,7 +39,7 @@ def getCategory(alias):
 def getCafe(id):
     return "do something"
 
-# Adds {Cafe, Category} relationship to database
+# Adds {Cafe, Category} relationship to database by looping through each category
 # TODO: finish this method
 def insertCafeCategories(cafeId, categories):
     return "do something"
@@ -65,6 +65,7 @@ def insertCafes(cafes):
             c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
         categories = getCategoryIds(c['categories'])
         insertDataToDB('cafe', cafe_values)
+        insertCafeCategories(c[id], categories)
     test = CUR.execute('SELECT * FROM Cafe')
     rows = CUR.fetchall()
     return rows
@@ -86,10 +87,12 @@ def searchByLocation(location):
     url_params = {
         'categories': 'coffee',
         'location': location.replace(' ', '+'),
-        # 'limit': 50,
+        'limit': 50,
+        # 'offset: 50,
         'sort_by': 'rating'
     }
     results = request(url_params)
+    # TODO: continue to request and process more results if # of cafes added != total result count
     businesses = results.get('businesses')
     total_results = results.get('total')
     insertCafes(businesses)
