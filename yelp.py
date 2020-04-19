@@ -3,6 +3,12 @@ from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.parse import urlencode
 
+# API variables
+API_KEY= "EKJ9TZaYDzW-wnqgcQxNVVQQwz-K624lEH_Cwj1DI7NvHZm16P6P0YMsfvE2Jm4a1h2GWGwZlSikgo45BzGJXfxLdPtWBrlq6cJYMfLsjZrUq8XZZOJogZ65kaaYXnYx" 
+API_HOST = 'https://api.yelp.com'
+SEARCH_PATH = '/v3/businesses/search'
+
+# Use Yelp Fusion API, Business Endpoint to get all Coffee shops at given location
 def searchByLocation(location):
     return ""
 
@@ -14,7 +20,7 @@ def main():
         if location.lower() == "exit":
             exit()
         else:
-            # try catch如果API request有http error的話會直接結束
+            # Exit if encounters HTTP error during API request
             try:
                 searchByLocation(location)
             except HTTPError as error:
