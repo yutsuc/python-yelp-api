@@ -24,16 +24,32 @@ def insertDataToDB(table, data):
   
     CUR.execute(insert, data)
     CONN.commit()
+    insertedId= CUR.lastrowid
+    return insertedId
 
-def insertCategory(categories):
-    return ""
+def getCategory(alias):
+    sql = 'SELECT Id, Title, Alias FROM Category WHERE Alias = "{0}"'.format(alias)
+    CUR.execute(sql)
+    return CUR.fetchall()
     
+def getCategoryIds(categories):
+    ids = []
+    for c in categories:
+        category = getCategory(c['alias'])
+        if len(category) == 0:
+            category_values = [c['title'], c['alias']]
+            id = insertDataToDB('category', category_values)
+        else:
+            id = category[0][0]
+        ids.append(id)
+    return ids
+
 def insertCafes(cafes):
     # TODO: check if exist before insert
     for c in cafes:
         cafe_values = [c['id'], c['name'], c['rating'], c['review_count'], c['location']['state'],
             c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
-        insertCategory(c['categories'])
+        categories = getCategoryIds(c['categories'])
         insertDataToDB('cafe', cafe_values)
     test = CUR.execute('SELECT * FROM Cafe')
     rows = CUR.fetchall()
