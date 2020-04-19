@@ -59,9 +59,15 @@ def getCategory(alias):
     return CUR.fetchall()
 
 # Gets Cafe with given Yelp ID
-# TODO: finish this method
 def getCafeById(id):
-    return "do something"
+    query = ''' 
+        SELECT Id, Name, Rating, NumberOfReviews, State, City, FullAddress, ZipCode, PhoneNumber, YelpURL   
+        FROM Cafe 
+        WHERE Id = "{0}"'.format(id)
+        '''
+    CUR.execute(query).fetchall()
+    result = CUR.execute(query).fetchall()
+    return result
 
 # Adds {Cafe, Category} relationship to database by looping through each category
 # TODO: finish this method
