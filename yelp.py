@@ -41,7 +41,7 @@ CACHE_DICT = load_cache()
 # Insert data to given table
 def insertDataToDB(table, data):
     if table == 'cafe':
-        insert = 'INSERT INTO Cafe VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        insert = 'INSERT INTO Cafe VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     elif table == 'category':
         insert = 'INSERT INTO Category VALUES (NULL, ?, ?)'
     elif table == 'cafe_category':
@@ -59,11 +59,11 @@ def getCategory(alias):
     return result
 
 # Gets Cafe with given Yelp ID
-def getCafeById(id):
-    query = ''' 
-        SELECT Id, Name, Rating, NumberOfReviews, State, City, FullAddress, ZipCode, PhoneNumber, YelpURL   
+def getCafeById(yelpid):
+    query = f''' 
+        SELECT Id, YelpId, Name, Rating, NumberOfReviews, State, City, FullAddress, ZipCode, PhoneNumber, YelpURL   
         FROM Cafe 
-        WHERE Id = "{0}"'.format(id)
+        WHERE YelpId = "{yelpid}"
         '''
     result = CUR.execute(query).fetchone()
     return result
@@ -94,8 +94,8 @@ def insertCafes(cafes):
         cafe_values = [c['id'], c['name'], c['rating'], c['review_count'], c['location']['state'],
             c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
         categories = getCategoryIds(c['categories'])
-        insertDataToDB('cafe', cafe_values)
-        insertCafeCategories(c['id'], categories)
+        cafeId = insertDataToDB('cafe', cafe_values)
+        insertCafeCategories(cafeId, categories)
     cafes = CUR.execute('SELECT * FROM Cafe').fetchall()
     categories = CUR.execute('SELECT * FROM Category').fetchall()
     relationship = CUR.execute('SELECT * FROM Cafe_Category').fetchall()

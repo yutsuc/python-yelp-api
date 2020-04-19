@@ -10,7 +10,8 @@ drop_cafe_category = 'DROP TABLE IF EXISTS "Cafe_Category"'
 
 create_cafe = '''
     CREATE TABLE IF NOT EXISTS "Cafe" (
-        "Id"                TEXT PRIMARY KEY UNIQUE,
+        "Id"                INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+        "YelpId"            TEXT NOT NULL,
         "Name"              TEXT NOT NULL,
         "Rating"            REAL,
         "NumberOfReviews"   INTEGER,
@@ -31,9 +32,9 @@ create_category = '''
 '''
 create_cafe_category = '''
     CREATE TABLE IF NOT EXISTS "Cafe_Category" (
-        "CafeId"            TEXT NOT NULL,
+        "CafeId"            INTEGER NOT NULL,
         "CategoryId"        INTEGER NOT NULL,
-        FOREIGN KEY(CafeId) REFERENCES Cafe(Id)
+        FOREIGN KEY(CafeId) REFERENCES Cafe(Id),
         FOREIGN KEY(CategoryId) REFERENCES Category(Id)
     );
 '''
