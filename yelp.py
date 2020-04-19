@@ -1,4 +1,5 @@
 import sys
+import requests
 from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.parse import urlencode
@@ -8,9 +9,31 @@ API_KEY= "EKJ9TZaYDzW-wnqgcQxNVVQQwz-K624lEH_Cwj1DI7NvHZm16P6P0YMsfvE2Jm4a1h2GWG
 API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
 
-# Use Yelp Fusion API, Business Endpoint to get all Coffee shops at given location
+# Sends request to Yelp Fusion API, Business Endpoint
+def request(url_params=None):
+    url_params = url_params or {}
+    url = '{0}{1}'.format(API_HOST, quote(SEARCH_PATH.encode('utf8')))
+    headers = {
+        'Authorization': 'Bearer %s' % API_KEY,
+    }
+    response = requests.request('GET', url, headers=headers, params=url_params)
+    return response.json()
+
+# Searches for coffee shops at given location
+# Process results and store each item in the database
 def searchByLocation(location):
-    return ""
+    # Request parameters
+    url_params = {
+        'categories': 'coffee',
+        'location': location.replace(' ', '+'),
+        # 'limit': 50,
+        'sort_by': 'rating'
+    }
+    results = request(url_params)
+    businesses = results.get('businesses')
+    total_results = results.get('total')
+
+    return businesses
 
 def main():
     while True:
