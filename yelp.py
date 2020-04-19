@@ -91,7 +91,7 @@ class Category:
     '''
     def __init__(self, id, title, alias):
         self.id = id
-        self.title = title,
+        self.title = title
         self.alias = alias
 
 # Insert data to given table
@@ -112,6 +112,8 @@ def insertDataToDB(table, data):
 def getCategory(alias):
     sql = 'SELECT Id, Title, Alias FROM Category WHERE Alias = "{0}"'.format(alias)
     result = CUR.execute(sql).fetchone()
+    if result != None:
+        return Category(result[0], result[1], result[2])
     return result
 
 # Gets Cafe with given Yelp ID
@@ -122,7 +124,10 @@ def getCafeById(yelpid):
         WHERE YelpId = "{yelpid}"
         '''
     result = CUR.execute(query).fetchone()
-    return result
+    if result != None:
+        return Cafe(result[0], result[1], result[2], result[3], result[4], result[5],
+            result[6], result[7], result[8], result[9], result[10])
+    return result 
 
 # Adds {Cafe, Category} relationship to database by looping through each category
 def insertCafeCategories(cafeId, categories):
@@ -139,7 +144,7 @@ def getCategoryIds(categories):
             category_values = [c['title'], c['alias']]
             id = insertDataToDB('category', category_values)
         else:
-            id = category[0]
+            id = category.id
         ids.append(id)
     return ids
 
