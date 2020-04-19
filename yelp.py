@@ -14,6 +14,7 @@ API_KEY= 'EKJ9TZaYDzW-wnqgcQxNVVQQwz-K624lEH_Cwj1DI7NvHZm16P6P0YMsfvE2Jm4a1h2GWG
 API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
 
+# Insert data to given table
 def insertDataToDB(table, data):
     if table == 'cafe':
         insert = 'INSERT INTO Cafe VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
@@ -24,14 +25,26 @@ def insertDataToDB(table, data):
   
     CUR.execute(insert, data)
     CONN.commit()
-    insertedId= CUR.lastrowid
-    return insertedId
+    lastInsertedId= CUR.lastrowid
+    return lastInsertedId
 
+# Gets Category with given Alias
 def getCategory(alias):
     sql = 'SELECT Id, Title, Alias FROM Category WHERE Alias = "{0}"'.format(alias)
     CUR.execute(sql)
     return CUR.fetchall()
-    
+
+# Gets Cafe with given Yelp ID
+# TODO: finish this method
+def getCafe(id):
+    return "do something"
+
+# Adds {Cafe, Category} relationship to database
+# TODO: finish this method
+def insertCafeCategories(cafeId, categories):
+    return "do something"
+
+# Gets a list of IDs associated with given categories
 def getCategoryIds(categories):
     ids = []
     for c in categories:
@@ -44,8 +57,9 @@ def getCategoryIds(categories):
         ids.append(id)
     return ids
 
+# Adds data to database tables
 def insertCafes(cafes):
-    # TODO: check if exist before insert
+    # TODO: check if cafe exist before insert
     for c in cafes:
         cafe_values = [c['id'], c['name'], c['rating'], c['review_count'], c['location']['state'],
             c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
@@ -54,7 +68,6 @@ def insertCafes(cafes):
     test = CUR.execute('SELECT * FROM Cafe')
     rows = CUR.fetchall()
     return rows
-    
 
 # Sends request to Yelp Fusion API, Business Endpoint
 def request(url_params=None):
