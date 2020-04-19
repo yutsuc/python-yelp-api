@@ -109,7 +109,7 @@ def insertDataToDB(table, data):
     return lastInsertedId
 
 # Gets Category with given Alias
-def getCategory(alias):
+def getCategoryByAlias(alias):
     sql = 'SELECT Id, Title, Alias FROM Category WHERE Alias = "{0}"'.format(alias)
     result = CUR.execute(sql).fetchone()
     if result != None:
@@ -117,7 +117,7 @@ def getCategory(alias):
     return result
 
 # Gets Cafe with given Yelp ID
-def getCafeById(yelpid):
+def getCafeByYelpId(yelpid):
     query = f''' 
         SELECT Id, YelpId, Name, Rating, NumberOfReviews, State, City, FullAddress, ZipCode, PhoneNumber, YelpURL   
         FROM Cafe 
@@ -139,7 +139,7 @@ def insertCafeCategories(cafeId, categories):
 def getCategoryIds(categories):
     ids = []
     for c in categories:
-        category = getCategory(c['alias'])
+        category = getCategoryByAlias(c['alias'])
         if category == None:
             category_values = [c['title'], c['alias']]
             id = insertDataToDB('category', category_values)
@@ -150,13 +150,15 @@ def getCategoryIds(categories):
 
 # Adds data to database tables
 def insertCafes(cafes):
-    # TODO: check if cafe exist before insert
     for c in cafes:
-        cafe_values = [c['id'], c['name'], c['rating'], c['review_count'], c['location']['state'],
-            c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
-        categories = getCategoryIds(c['categories'])
-        cafeId = insertDataToDB('cafe', cafe_values)
-        insertCafeCategories(cafeId, categories)
+        cafe = getCafeByYelpId(c['id'])
+        if cafe == None:
+            # Only need to do inserts if Cafe hasn't been added to database before
+            cafe_values = [c['id'], c['name'], c['rating'], c['review_count'], c['location']['state'],
+                c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
+            categories = getCategoryIds(c['categories'])
+            cafeId = insertDataToDB('cafe', cafe_values)
+            insertCafeCategories(cafeId, categories)
     # TODO: test data. delete before submit
     cafes = CUR.execute('SELECT * FROM Cafe').fetchall()
     categories = CUR.execute('SELECT * FROM Category').fetchall()
@@ -166,7 +168,7 @@ def insertCafes(cafes):
 # Sends request to Yelp Fusion API, Business Endpoint
 def request(url_params=None):
     url_params = url_params or {}
-    url = '{0}{1}'.format(API_HOST, quote(SEARCH_PATH.encode('utf8')))
+    url = '{0}{1}'.format(API_HOST, SEARCH_PATH)
     headers = {
         'Authorization': 'Bearer %s' % API_KEY,
     }
