@@ -38,6 +38,62 @@ def save_cache(cache):
 # Load the cache, save in global variable
 CACHE_DICT = load_cache()
 
+# Cafe Instance
+class Cafe:
+    ''' Instance Attributes
+    --------------------------------------
+    id: int
+        database auto generated ID (e.g. 145)
+    yelpid: string
+        distinct ID from Yelp (e.g. 'SGwK1mC95VFWtIvUZLdXEg')
+    name: string
+        name of the cafe (e.g. 'Bearclaw Coffee')
+    rating: float
+        Yelp rating of the cafe (e.g. 3.5)
+    numberofreviews: int
+        number of Yelp reviews (e.g. 39)
+    state: string
+        state of the cafe (e.g. 'MI')
+    city: string
+        city of the cafe (e.g. 'Ann Arbor')
+    fulladdress: string
+        full address of the cafe (e.g. '2460 Washtenaw Ave, Ann Arbor, MI 48104')
+    zipcode: int
+        zip code of the cafe (e.g. 48104)
+    phonenumber: string
+        phone number of the cafe (e.g. '(734) 332-7850')
+    yelpurl: string
+        URL of the cafe on yelp (e.g. 'https://www.yelp.com/biz/bearclaw-coffee-ann-arbor-3?adjust_creative=VF_368K_nLLvE2b2T7zR_g&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=VF_368K_nLLvE2b2T7zR_g')
+    '''
+    def __init__(self, id, yelpid, name, rating, numberofreviews, state, city, fulladdress, zipcode, phonenumber, yelpurl):
+        self.id = id
+        self.yelpid = yelpid
+        self.name = name
+        self.rating = rating
+        self.numberofreviews = numberofreviews
+        self.state = state
+        self.city = city
+        self.fulladdress = fulladdress
+        self.zipcode = zipcode
+        self.phonenumber = phonenumber
+        self.yelpurl = yelpurl
+
+# Category Instance
+class Category:
+    ''' Instance Attributes
+    --------------------------------------
+    id: int
+        database auto generated ID (e.g. 3)
+    title: string
+        title of the category (e.g. 'Coffee & Tea')
+    alias: string
+        alias of the category (e.g. 'coffee')
+    '''
+    def __init__(self, id, title, alias):
+        self.id = id
+        self.title = title,
+        self.alias = alias
+
 # Insert data to given table
 def insertDataToDB(table, data):
     if table == 'cafe':
@@ -96,6 +152,7 @@ def insertCafes(cafes):
         categories = getCategoryIds(c['categories'])
         cafeId = insertDataToDB('cafe', cafe_values)
         insertCafeCategories(cafeId, categories)
+    # TODO: test data. delete before submit
     cafes = CUR.execute('SELECT * FROM Cafe').fetchall()
     categories = CUR.execute('SELECT * FROM Category').fetchall()
     relationship = CUR.execute('SELECT * FROM Cafe_Category').fetchall()
