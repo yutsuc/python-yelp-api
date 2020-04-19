@@ -55,8 +55,8 @@ def insertDataToDB(table, data):
 # Gets Category with given Alias
 def getCategory(alias):
     sql = 'SELECT Id, Title, Alias FROM Category WHERE Alias = "{0}"'.format(alias)
-    CUR.execute(sql)
-    return CUR.fetchall()
+    result = CUR.execute(sql).fetchone()
+    return result
 
 # Gets Cafe with given Yelp ID
 def getCafeById(id):
@@ -65,12 +65,10 @@ def getCafeById(id):
         FROM Cafe 
         WHERE Id = "{0}"'.format(id)
         '''
-    CUR.execute(query).fetchall()
-    result = CUR.execute(query).fetchall()
+    result = CUR.execute(query).fetchone()
     return result
 
 # Adds {Cafe, Category} relationship to database by looping through each category
-# TODO: finish this method
 def insertCafeCategories(cafeId, categories):
     for c in categories:
         values = [cafeId, c]
@@ -81,11 +79,11 @@ def getCategoryIds(categories):
     ids = []
     for c in categories:
         category = getCategory(c['alias'])
-        if len(category) == 0:
+        if category == None:
             category_values = [c['title'], c['alias']]
             id = insertDataToDB('category', category_values)
         else:
-            id = category[0][0]
+            id = category[0]
         ids.append(id)
     return ids
 
