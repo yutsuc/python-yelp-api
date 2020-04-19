@@ -1,3 +1,4 @@
+import json
 import requests
 import sqlite3
 import sys
@@ -5,14 +6,37 @@ from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.parse import urlencode
 
+# Cache variables
+CACHE_FILE_NAME = 'cache.json'
+CACHE_DICT = {}
+
 # Database variables
-CONN = sqlite3.connect('./YelpCafe.sqlite')
+CONN = sqlite3.connect('YelpCafe.sqlite')
 CUR = CONN.cursor()
 
 # API variables
 API_KEY= 'EKJ9TZaYDzW-wnqgcQxNVVQQwz-K624lEH_Cwj1DI7NvHZm16P6P0YMsfvE2Jm4a1h2GWGwZlSikgo45BzGJXfxLdPtWBrlq6cJYMfLsjZrUq8XZZOJogZ65kaaYXnYx'
 API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
+
+def load_cache():
+    try:
+        cache_file = open(CACHE_FILE_NAME, 'r')
+        cache_file_contents = cache_file.read()
+        cache = json.loads(cache_file_contents)
+        cache_file.close()
+    except:
+        cache = {}
+    return cache
+
+def save_cache(cache):
+    cache_file = open(CACHE_FILE_NAME, 'w')
+    contents_to_write = json.dumps(cache)
+    cache_file.write(contents_to_write)
+    cache_file.close()
+
+# Load the cache, save in global variable
+CACHE_DICT = load_cache()
 
 # Insert data to given table
 def insertDataToDB(table, data):
@@ -36,7 +60,7 @@ def getCategory(alias):
 
 # Gets Cafe with given Yelp ID
 # TODO: finish this method
-def getCafe(id):
+def getCafeById(id):
     return "do something"
 
 # Adds {Cafe, Category} relationship to database by looping through each category
@@ -97,7 +121,20 @@ def searchByLocation(location):
     total_results = results.get('total')
     insertCafes(businesses)
     
-    return businesses
+    return total_results
+
+# Checks cache to see if give location has been processed before
+def make_request_using_cache(location):
+    if location in CACHE_DICT.keys():
+        # TODO: Change to return top 10 cafe wth given location from database 
+        return CACHE_DICT[location]
+    else:
+        # Saves number of cafes at given location to the cache to indicate that the location has been requested before
+        data = searchByLocation(location)
+        CACHE_DICT[location] = data
+        save_cache(CACHE_DICT)
+        # TODO: Change to return top 10 cafe wth given location from database 
+        return data
 
 def main():
     while True:
@@ -109,7 +146,7 @@ def main():
         else:
             # Exit if encounters HTTP error during API request
             try:
-                searchByLocation(location)
+                make_request_using_cache(location)
             except HTTPError as error:
                 exit(
                     'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
