@@ -18,7 +18,6 @@ To get started:
 
 ## TODO
 makes improvements to following methods
-- insertCafes - check if cafe exist before insert
 - searchByLocation - continue to request and process more results
 - make_request_using_cache(location) - return top 10 resesults
 
