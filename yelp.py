@@ -72,7 +72,9 @@ def getCafeById(id):
 # Adds {Cafe, Category} relationship to database by looping through each category
 # TODO: finish this method
 def insertCafeCategories(cafeId, categories):
-    return "do something"
+    for c in categories:
+        values = [cafeId, c]
+        insertDataToDB('cafe_category', values)
 
 # Gets a list of IDs associated with given categories
 def getCategoryIds(categories):
@@ -95,10 +97,11 @@ def insertCafes(cafes):
             c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
         categories = getCategoryIds(c['categories'])
         insertDataToDB('cafe', cafe_values)
-        insertCafeCategories(c[id], categories)
-    test = CUR.execute('SELECT * FROM Cafe')
-    rows = CUR.fetchall()
-    return rows
+        insertCafeCategories(c['id'], categories)
+    cafes = CUR.execute('SELECT * FROM Cafe').fetchall()
+    categories = CUR.execute('SELECT * FROM Category').fetchall()
+    relationship = CUR.execute('SELECT * FROM Cafe_Category').fetchall()
+    return cafes
 
 # Sends request to Yelp Fusion API, Business Endpoint
 def request(url_params=None):
