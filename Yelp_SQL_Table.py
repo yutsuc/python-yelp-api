@@ -4,13 +4,11 @@ import sqlite3
 conn = sqlite3.connect("YelpCafe.sqlite")
 cur = conn.cursor()
 
-drop_existing = '''
-    DROP TABLE IF EXISTS "Cafe";
-    DROP TABLE IF EXISTS "Category";
-    DROP TABLE IF EXISTS "Cafe_Category";
-'''
+drop_cafe = 'DROP TABLE IF EXISTS "Cafe"'
+drop_category = 'DROP TABLE IF EXISTS "Category"'
+drop_cafe_category = 'DROP TABLE IF EXISTS "Cafe_Category"'
 
-create_tables = '''
+create_cafe = '''
     CREATE TABLE IF NOT EXISTS "Cafe" (
         "Id"                TEXT PRIMARY KEY UNIQUE,
         "Name"              TEXT NOT NULL,
@@ -23,11 +21,16 @@ create_tables = '''
         "PhoneNumber"       TEXT,
         "YelpURL"           TEXT
     );
-    CREATE TABLE IF NOT EXISTS "Category" (
-        "Id"                INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-        "Title"             TEXT NOT NULL,
-        "Alias"             TEXT NOT NULL
+'''
+create_category = '''
+    CREATE TABLE IF NOT EXISTS "Cafe_Category" (
+        "CafeId"            TEXT NOT NULL,
+        "CategoryId"        INTEGER NOT NULL,
+        FOREIGN KEY(CafeId) REFERENCES Cafe(Id)
+        FOREIGN KEY(CategoryId) REFERENCES Category(Id)
     );
+'''
+create_cafe_category = '''
     CREATE TABLE IF NOT EXISTS "Cafe_Category" (
         "CafeId"            TEXT NOT NULL,
         "CategoryId"        INTEGER NOT NULL,
@@ -36,7 +39,12 @@ create_tables = '''
     );
 '''
 
-cur.execute(drop_existing)
-cur.execute(create_tables)
+cur.execute(drop_cafe)
+cur.execute(drop_category)
+cur.execute(drop_cafe_category)
+
+cur.execute(create_cafe)
+cur.execute(create_category)
+cur.execute(create_cafe_category)
 
 conn.commit()
