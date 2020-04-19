@@ -17,10 +17,6 @@ To get started:
 ```
 
 ## TODO
-finish following methods
-- getCafeById(id)
-- insertCafeCategories(cafeId, categories)
-
 makes improvements to following methods
 - insertCafes - check if cafe exist before insert
 - searchByLocation - continue to request and process more results
