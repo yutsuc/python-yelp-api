@@ -19,7 +19,6 @@ To get started:
 ## TODO
 makes improvements to following methods
 - searchByLocation - continue to request and process more results
-- make_request_using_cache(location) - return top 10 resesults
 
 ## Important
 The program makes API requests to Yelp Fusion API. For a list of request parameters and response attributes, you can find it [here](https://www.yelp.com/developers/documentation/v3/business_search)
