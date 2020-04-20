@@ -19,25 +19,6 @@ API_KEY= 'EKJ9TZaYDzW-wnqgcQxNVVQQwz-K624lEH_Cwj1DI7NvHZm16P6P0YMsfvE2Jm4a1h2GWG
 API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
 
-def load_cache():
-    try:
-        cache_file = open(CACHE_FILE_NAME, 'r')
-        cache_file_contents = cache_file.read()
-        cache = json.loads(cache_file_contents)
-        cache_file.close()
-    except:
-        cache = {}
-    return cache
-
-def save_cache(cache):
-    cache_file = open(CACHE_FILE_NAME, 'w')
-    contents_to_write = json.dumps(cache)
-    cache_file.write(contents_to_write)
-    cache_file.close()
-
-# Load the cache, save in global variable
-CACHE_DICT = load_cache()
-
 # Cafe Instance
 class Cafe:
     ''' Instance Attributes
@@ -93,6 +74,34 @@ class Category:
         self.id = id
         self.title = title
         self.alias = alias
+
+def load_cache():
+    try:
+        cache_file = open(CACHE_FILE_NAME, 'r')
+        cache_file_contents = cache_file.read()
+        cache = json.loads(cache_file_contents)
+        cache_file.close()
+        for city in cache.keys():
+            for index, item in enumerate(cache[city]):
+                # Convert dict to Cafe object
+                instance = object.__new__(Cafe)
+                for key, value in item.items():
+                    setattr(instance, key, value)
+                cache[city][index] = instance
+        return cache
+    except:
+        cache = {}
+    return cache
+
+def save_cache(cache):
+    cache_file = open(CACHE_FILE_NAME, 'w')
+    # Convert object to dict
+    contents_to_write = json.dumps(cache, default=lambda x: x.__dict__)
+    cache_file.write(contents_to_write)
+    cache_file.close()
+
+# Load the cache, save in global variable
+CACHE_DICT = load_cache()
 
 # Insert data to given table
 def insertDataToDB(table, data):
@@ -150,20 +159,28 @@ def getCategoryIds(categories):
 
 # Adds data to database tables
 def insertCafes(cafes):
+    cafeList = []
     for c in cafes:
         cafe = getCafeByYelpId(c['id'])
         if cafe == None:
             # Only need to do inserts if Cafe hasn't been added to database before
-            cafe_values = [c['id'], c['name'], c['rating'], c['review_count'], c['location']['state'],
-                c['location']['city'], ', '.join(c['location']['display_address']), c['location']['zip_code'], c['display_phone'], c['url']]
+            yelpid = c['id']
+            name = c['name']
+            rating = c['rating']
+            reviewcount = c['review_count']
+            state = c['location']['state']
+            city = c['location']['city']
+            address = ', '.join(c['location']['display_address'])
+            zipcode = c['location']['zip_code']
+            phone = c['display_phone']
+            url = c['url']
+            cafe_values = [yelpid, name, rating, reviewcount, state, city, address, zipcode, phone, url]
             categories = getCategoryIds(c['categories'])
             cafeId = insertDataToDB('cafe', cafe_values)
             insertCafeCategories(cafeId, categories)
-    # TODO: test data. delete before submit
-    cafes = CUR.execute('SELECT * FROM Cafe').fetchall()
-    categories = CUR.execute('SELECT * FROM Category').fetchall()
-    relationship = CUR.execute('SELECT * FROM Cafe_Category').fetchall()
-    return cafes
+            cafe = Cafe(cafeId, yelpid, name, rating, reviewcount, state, city, address, zipcode, phone, url)
+        cafeList.append(cafe)
+    return cafeList
 
 # Sends request to Yelp Fusion API, Business Endpoint
 def request(url_params=None):
@@ -177,6 +194,7 @@ def request(url_params=None):
 
 # Searches for coffee shops at given location
 # Process results and store each item in the database
+# Returns top 10 result to be stored in the cache
 def searchByLocation(location):
     # Request parameters
     url_params = {
@@ -188,23 +206,19 @@ def searchByLocation(location):
     }
     results = request(url_params)
     # TODO: continue to request and process more results if # of cafes added != total result count
-    businesses = results.get('businesses')
-    total_results = results.get('total')
-    insertCafes(businesses)
-    
-    return total_results
+    cafes = insertCafes(results.get('businesses'))
+    # return first 10
+    return cafes[:10]
 
 # Checks cache to see if give location has been processed before
 def make_request_using_cache(location):
     if location in CACHE_DICT.keys():
-        # TODO: Change to return top 10 cafe wth given location from database 
         return CACHE_DICT[location]
     else:
-        # Saves number of cafes at given location to the cache to indicate that the location has been requested before
+        # Saves top 10 cafes at given location to the cache
         data = searchByLocation(location)
         CACHE_DICT[location] = data
         save_cache(CACHE_DICT)
-        # TODO: Change to return top 10 cafe wth given location from database 
         return data
 
 def main():
@@ -217,7 +231,7 @@ def main():
         else:
             # Exit if encounters HTTP error during API request
             try:
-                make_request_using_cache(location)
+                top10 = make_request_using_cache(location.lower())
             except HTTPError as error:
                 exit(
                     'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
