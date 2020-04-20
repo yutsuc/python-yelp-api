@@ -232,6 +232,8 @@ def main():
             # Exit if encounters HTTP error during API request
             try:
                 top10 = make_request_using_cache(location.lower())
+                for item in top10:
+                    print('{0} ({1})'.format(item.name, item.rating))
             except HTTPError as error:
                 exit(
                     'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
