@@ -1,6 +1,6 @@
 # Yelp API Project
 
-This app allows you to get top 10 cafes by input location and displays various plots.
+This app allows you to get top 10 cafes by input location
 
 ## TL;DR
 
