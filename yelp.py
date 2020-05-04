@@ -221,6 +221,17 @@ def make_request_using_cache(location):
         save_cache(CACHE_DICT)
         return data
 
+# Prints formatted result
+def print_format(result):
+    row = "{i:6} {name:<20} {rating:<8} {numberofreviews:<6}".format
+
+    for i in range(len(result)):
+        shortenedName = result[i].name
+        if len(result[i].name) > 15:
+            shortenedName = result[i].name[:15]+'...'
+        print(row(i='['+str(i+1)+']', name=shortenedName, rating=result[i].rating, numberofreviews=result[i].numberofreviews))
+        i = i+1
+
 def main():
     while True:
         # Gets user input of location
@@ -232,8 +243,14 @@ def main():
             # Exit if encounters HTTP error during API request
             try:
                 top10 = make_request_using_cache(location.lower())
-                for item in top10:
-                    print('{0} ({1})'.format(item.name, item.rating))
+                # Print header
+                print("--------------------------------------------------------")
+                print(f"List of Top 10 Cafe in {location}")
+                print("--------------------------------------------------------")
+                print("{0:<6} {1:<20} {2:<8} {3:<6}".format("Number","Name", "Rating", "Number of Reviews"))
+                # Print data
+                print_format(sorted(top10, key=lambda item: item.rating, reverse=True))
+                print("--------------------------------------------------------")
             except HTTPError as error:
                 exit(
                     'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
